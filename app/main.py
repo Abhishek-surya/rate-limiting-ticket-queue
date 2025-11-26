@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.core.database import Base, engine
 from app.models import job_model
 
-app = FastAPI(title="Ticket Queue OJT - Day 1")
+app = FastAPI(title="Ticket Queue")
 
 Base.metadata.create_all(bind=engine)
 
