@@ -6,7 +6,7 @@ from app.models.job_model import Job
 from app.schemas.job_schema import SubmitJobRequest, JobStatusResponse
 from app.services.rate_limiter import check_rate_limit
 from app.services.idempotency import check_idempotency
-
+from app.services.job_service import create_new_job, get_job_by_id
 
 router = APIRouter()
 
@@ -25,16 +25,12 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
             error_message=existing_job.error_message
         )
     
-    job = Job(
+    job = create_new_job(
+        db=db,
         user_id=request.user_id,
         payload=request.payload,
-        idempotency_key=request.idempotency_key,
-        state="queued"
+        idempotency_key=request.idempotency_key
     )
-
-    db.add(job)
-    db.commit()
-    db.refresh(job)
 
     return JobStatusResponse(
         job_id=job.id,
@@ -47,7 +43,7 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
 @router.get("/job_status/{job_id}", response_model=JobStatusResponse)
 def job_status(job_id: int, db: Session = Depends(get_db)):
 
-    job = db.query(Job).filter(Job.id == job_id).first()
+    job = get_job_by_id(db, job_id)
 
     if not job:
         return JobStatusResponse(
