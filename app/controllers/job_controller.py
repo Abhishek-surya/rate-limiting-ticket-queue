@@ -4,13 +4,27 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.job_model import Job
 from app.schemas.job_schema import SubmitJobRequest, JobStatusResponse
+from app.services.rate_limiter import check_rate_limit
+from app.services.idempotency import check_idempotency
+
 
 router = APIRouter()
 
 @router.post("/submit_job", response_model=JobStatusResponse)
 def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
-    
 
+    check_rate_limit(request.user_id)
+
+    existing_job = check_idempotency(db, request.user_id, request.idempotency_key)
+
+    if existing_job:
+        return JobStatusResponse(
+            job_id=existing_job.id,
+            state=existing_job.state,
+            result=existing_job.result,
+            error_message=existing_job.error_message
+        )
+    
     job = Job(
         user_id=request.user_id,
         payload=request.payload,
