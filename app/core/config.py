@@ -1,0 +1,5 @@
+WINDOW_SECONDS: int = 60  
+
+GLOBAL_RATE_LIMIT: int = 100  
+
+PER_USER_RATE_LIMIT: int = 20  
