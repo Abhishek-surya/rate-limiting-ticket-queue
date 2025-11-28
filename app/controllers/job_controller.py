@@ -25,6 +25,7 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
             error_message=existing_job.error_message
         )
     
+    
     job = create_new_job(
         db=db,
         user_id=request.user_id,
