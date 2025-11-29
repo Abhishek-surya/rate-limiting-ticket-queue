@@ -122,9 +122,6 @@
             color: #f56565;
         }
 
-        .stat-card.avg-time .number {
-            color: #9f7aea;
-        }
 
         .stat-card .unit {
             color: #999;
@@ -478,11 +475,6 @@
                 <div class="stat-card failed">
                     <h3>Failed</h3>
                     <div class="number">${stats.failed_count}</div>
-                </div>
-                <div class="stat-card avg-time">
-                    <h3>Avg Time</h3>
-                    <div class="number">${stats.avg_processing_time ? stats.avg_processing_time.toFixed(2) : 'N/A'}</div>
-                    <div class="unit">${stats.avg_processing_time ? 'seconds' : ''}</div>
                 </div>
             `;
         }
