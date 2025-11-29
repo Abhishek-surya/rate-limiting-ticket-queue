@@ -64,7 +64,7 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
 @router.get("/job_status/{job_id}", response_model=JobStatusResponse)
 def job_status(job_id: int, db: Session = Depends(get_db)):
 
-    job = db.query(Job).filter(Job.id == job_id).first()
+    job = get_job_by_id(db, job_id)
 
     if not job:
         return JobStatusResponse(
