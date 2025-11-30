@@ -15,6 +15,7 @@ def run_worker():
 
     while True:
         db: Session = SessionLocal()
+        job = None  
 
         try:
             job = pick_next_job(db)

@@ -2,7 +2,9 @@ fastapi
 uvicorn
 sqlalchemy
 pymysql
+cryptography
 python-dotenv
 pydantic
 pydantic-settings
 apscheduler
+
