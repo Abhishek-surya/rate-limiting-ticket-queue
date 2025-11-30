@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Dict
 
 from fastapi import HTTPException, status
-from app.core.config import GLOBAL_RATE_LIMIT, PER_USER_RATE_LIMIT, WINDOW_SECONDS
+from core.config import GLOBAL_RATE_LIMIT, PER_USER_RATE_LIMIT, WINDOW_SECONDS
 
 
 class FixedWindowRateLimiter:

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.job_model import Job
+from models.job_model import Job
 
 
 def check_idempotency(db: Session, user_id: str, idempotency_key: str):

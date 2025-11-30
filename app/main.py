@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.database import Base, engine, SessionLocal
+from core.database import Base, engine, SessionLocal
 from sqlalchemy import inspect, text
 from models.job_model import Job
-from app.controllers.job_controller import router as job_router
+from controllers.job_controller import router as job_router
 import threading
-from app.worker.worker import run_worker
+from worker.worker import run_worker
 
 
 

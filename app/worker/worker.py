@@ -1,9 +1,9 @@
 import time
 from sqlalchemy.orm import Session
-from app.core.database import SessionLocal
+from core.database import SessionLocal
 
-from app.services.scheduler import pick_next_job
-from app.services.job_service import (
+from services.scheduler import pick_next_job
+from services.job_service import (
     mark_job_running,
     mark_job_done,
     mark_job_failed
