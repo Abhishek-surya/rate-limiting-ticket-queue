@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.job_model import Job
+from app.models.job_model import Job
 from sqlalchemy import asc
 
 def pick_next_job(db: Session):
