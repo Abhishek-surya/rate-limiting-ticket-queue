@@ -1,6 +1,2 @@
 [build]
-  # Publish the frontend directory (static HTML, no build needed)
   publish = "frontend"
-  # Use a command that always succeeds (no actual build step)
-  command = "echo 'Static site - no build required' && exit 0"
-
