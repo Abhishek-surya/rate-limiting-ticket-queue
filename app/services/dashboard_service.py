@@ -27,7 +27,6 @@ def get_dashboard_stats(db: Session):
     done = db.query(func.count(Job.id)).filter(Job.state == "done").scalar()
     failed = db.query(func.count(Job.id)).filter(Job.state == "failed").scalar()
     
-    # Calculate average processing time for completed jobs
     avg_time = None
     completed_jobs = db.query(Job).filter(Job.state.in_(["done", "failed"])).all()
     if completed_jobs:

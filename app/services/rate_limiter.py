@@ -32,14 +32,12 @@ class FixedWindowRateLimiter:
     def check(self, user_id: str) -> None:
         self._reset_window_if_needed()
         
-        # Check if global limit will be exceeded
         if self.global_count >= self.global_limit:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Too many requests (global limit). Please try again later.",
             )
         
-        # Check if per-user limit will be exceeded
         user_count = self.user_counters.get(user_id, 0)
         if user_count >= self.user_limit:
             raise HTTPException(
@@ -47,7 +45,6 @@ class FixedWindowRateLimiter:
                 detail="Too many requests for this user. Please try again later.",
             )
         
-        # If checks pass, increment counters
         self.global_count += 1
         self._increment_user(user_id)
 

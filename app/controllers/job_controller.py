@@ -89,14 +89,8 @@ def dashboard(db: Session = Depends(get_db)):
     """Get dashboard with job statistics and recent jobs"""
     
     stats = get_dashboard_stats(db)
-    
-    # Get running jobs
     running_jobs = get_running_jobs(db)
-    
-    # Get failed jobs
     failed_jobs = get_failed_jobs(db, limit=10)
-    
-    # Get recent jobs (last 20)
     recent_jobs = get_recent_jobs(db, limit=20)
     
     return DashboardResponse(
