@@ -7,17 +7,13 @@ import os
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Fallback to SQLite if DATABASE_URL not set
 if not DATABASE_URL:
-    DATABASE_URL = "sqlite:///./queue.db"
-    print(f"[Database] Using fallback SQLite database: {DATABASE_URL}")
-else:
-    print(f"[Database] Using DATABASE_URL from environment")
+    raise ValueError("DATABASE_URL environment variable is not set!")
 
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    connect_args={"check_same_thread": False} if "sqlite" in str(DATABASE_URL) else {}
 )
 
 SessionLocal = sessionmaker(
