@@ -1,10 +1,11 @@
-# app/core/database.py
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
+load_dotenv()
 
-# IMPORTANT: encoded password
-DATABASE_URL = "mysql+pymysql://root:Abhishek%40123@localhost:3306/ticket_limiter"
+import os
+
+DATABASE_URL =  os.getenv("DATABASE_URL")
 
 engine = create_engine(
     DATABASE_URL,
