@@ -1,12 +1,6 @@
 [build]
-  # Publish the frontend directory
+  # Publish the frontend directory (static HTML, no build needed)
   publish = "frontend"
-  # No build command needed for static HTML
-  command = "echo 'No build step required'"
-
-[[redirects]]
-  # Redirect all routes to index.html for SPA-like behavior (if needed)
-  from = "/*"
-  to = "/index.html"
-  status = 200
+  # Use a command that always succeeds (no actual build step)
+  command = "echo 'Static site - no build required' && exit 0"
 
