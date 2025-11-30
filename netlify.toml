@@ -1,2 +1,4 @@
 [build]
   publish = "frontend"
+  image = "ubuntu-22.04"
+  # No build command needed - static HTML site
