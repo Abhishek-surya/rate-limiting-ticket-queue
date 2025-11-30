@@ -626,6 +626,9 @@
             document.getElementById('userId').value = '';
             document.getElementById('payload').value = '';
             document.getElementById('generatedKey').value = '';
+            // Clear any previous alert messages
+            document.getElementById('submitAlert').innerHTML = '';
+            document.getElementById('submitAlert').className = 'alert';
         }
 
         function closeSubmitModal() {
@@ -672,20 +675,30 @@
 
                 // Check if it's a duplicate submission
                 if (data.is_duplicate) {
-                    showSuccess(`⚠️ Job already submitted! This payload was previously sent. Returned Job ID: ${data.job_id}`);
+                    // Show formal message for duplicate submission and keep modal open
+                    showDuplicateMessage(data.job_id);
                 } else {
-                    showSuccess(`✓ Job submitted successfully! Job ID: ${data.job_id}`);
+                    // First-time submission: close modal silently, no message
+                    document.getElementById('submitModal').style.display = 'none';
+                    document.querySelector('form').reset();
+                    document.getElementById('generatedKey').value = '';
+                    document.getElementById('submitAlert').innerHTML = '';
+                    document.getElementById('submitAlert').className = 'alert';
                 }
-                
-                document.getElementById('submitModal').style.display = 'none';
-                document.querySelector('form').reset();
-                document.getElementById('generatedKey').value = '';
                 
                 setTimeout(loadDashboard, 500);
             } catch (error) {
                 console.error('Error submitting job:', error);
                 showSubmitError(error.message);
             }
+        }
+
+        function showDuplicateMessage(jobId) {
+            const alert = document.getElementById('submitAlert');
+            alert.className = 'alert error';
+            alert.innerHTML = `This job has already been submitted with the same payload. The existing job ID is: <strong>${jobId}</strong>. Please use a different payload or check the status of the existing job.`;
+            alert.style.display = 'block';
+            // Don't auto-hide - let user read the message and close manually
         }
 
         function showSuccess(message) {
