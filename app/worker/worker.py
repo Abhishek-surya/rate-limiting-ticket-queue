@@ -1,5 +1,3 @@
-# app/worker/worker.py
-
 import time
 from sqlalchemy.orm import Session
 from core.database import SessionLocal

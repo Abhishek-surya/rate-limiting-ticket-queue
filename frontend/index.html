@@ -350,7 +350,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <header>
             <h1>📊 Queue Dashboard</h1>
             <p>Real-time job queue monitoring and management</p>
@@ -369,7 +368,6 @@
             </div>
         </div>
 
-        <!-- Running Jobs Section -->
         <div class="section">
             <h2>⚙️ Currently Running Jobs</h2>
             <div id="runningJobsContainer">
@@ -380,7 +378,6 @@
             </div>
         </div>
 
-        <!-- Failed Jobs Section -->
         <div class="section">
             <h2>❌ Failed Jobs (Rate Limited & Errors)</h2>
             <div id="failedJobsContainer">
@@ -391,7 +388,6 @@
             </div>
         </div>
 
-        <!-- Recent Jobs Section -->
         <div class="section">
             <h2>📋 Recent Jobs</h2>
             <div id="recentJobsContainer">
@@ -403,7 +399,6 @@
         </div>
     </div>
 
-    <!-- Submit Job Modal -->
     <div id="submitModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeSubmitModal()">&times;</span>
@@ -430,10 +425,8 @@
     <script>
         const API_BASE = 'http://localhost:8000';
 
-        // Load dashboard on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboard();
-            // Auto-refresh every 5 seconds
             setInterval(loadDashboard, 5000);
         });
 
@@ -651,7 +644,6 @@
                 document.getElementById('submitModal').style.display = 'none';
                 document.querySelector('form').reset();
                 
-                // Reload dashboard
                 setTimeout(loadDashboard, 500);
             } catch (error) {
                 console.error('Error submitting job:', error);
@@ -676,7 +668,6 @@
 
         function showError(message) {
             console.error(message);
-            // Could show a toast notification here
         }
 
         // Close modal when clicking outside

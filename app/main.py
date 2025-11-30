@@ -11,13 +11,12 @@ from worker.worker import run_worker
 
 app = FastAPI(title="Ticket Queue System")
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],  
+    allow_headers=["*"],  
 )
 
 def start_worker_thread():
@@ -26,7 +25,7 @@ def start_worker_thread():
         daemon=True    
     )
     worker_thread.start()
-    print("🚀 Background worker thread started!")
+    print("Background worker thread started!")
 
 @app.on_event("startup")
 def startup_event():

@@ -86,7 +86,6 @@ def job_status(job_id: int, db: Session = Depends(get_db)):
 def dashboard(db: Session = Depends(get_db)):
     """Get dashboard with job statistics and recent jobs"""
     
-    # Get statistics
     stats = get_dashboard_stats(db)
     
     # Get running jobs
