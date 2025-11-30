@@ -29,6 +29,10 @@ def start_worker_thread():
 
 @app.on_event("startup")
 def startup_event():
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    print("[Startup] Database tables created/verified")
+    
     start_worker_thread()
 
 app.include_router(job_router)
