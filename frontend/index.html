@@ -423,7 +423,11 @@
     </div>
 
     <script>
-        const API_BASE = 'https://rate-limiting-ticket-queue-production.up.railway.app';
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000'
+            : 'https://rate-limiting-ticket-queue-production.up.railway.app';
+
+        console.log('Using API Base:', API_BASE);
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboard();
