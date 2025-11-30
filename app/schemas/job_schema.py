@@ -5,7 +5,6 @@ from typing import List
 class SubmitJobRequest(BaseModel):
     user_id: str
     payload: str
-    idempotency_key: str
 
 
 class JobStatusResponse(BaseModel):

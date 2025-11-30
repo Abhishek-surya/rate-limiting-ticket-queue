@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+import hashlib
 
 from app.core.database import get_db
 from app.models.job_model import Job
@@ -14,8 +15,7 @@ router = APIRouter(prefix="/jobs", tags=["Jobs"])
 @router.post("/submit_job", response_model=JobStatusResponse)
 def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
 
-    # Idempotency check first (per user + idempotency key)
-    existing_job = check_idempotency(db, request.user_id, request.idempotency_key)
+    existing_job = check_idempotency(db, request.payload)
 
     if existing_job:
         return JobStatusResponse(
@@ -25,23 +25,20 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
             error_message=existing_job.error_message
         )
     
-    # Check rate limit BEFORE creating the job
     rate_limit_error = None
     try:
         check_rate_limit(request.user_id)
     except HTTPException as e:
-        # Capture the error message (global or per-user limit)
         rate_limit_error = e.detail if isinstance(e.detail, str) else str(e.detail)
     
-    # Create job based on request/payload type
+    idem_key = hashlib.md5(request.payload.encode()).hexdigest()
     job = create_new_job(
         db=db,
         user_id=request.user_id,
         payload=request.payload,
-        idempotency_key=request.idempotency_key
+        idempotency_key=idem_key
     )
     
-    # If rate limit was exceeded, mark job as failed with specific error
     if rate_limit_error:
         mark_job_failed(db, job, rate_limit_error)
         
@@ -52,7 +49,6 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
             error_message=rate_limit_error
         )
     
-    # Job created successfully and queued
     return JobStatusResponse(
         job_id=job.id,
         state=job.state,

@@ -175,50 +175,54 @@ class TestIdempotency:
     """Test idempotency correctness"""
     
     def test_idempotency_returns_existing_job(self):
-        """Test that idempotency key returns existing job"""
+        """Test that payload-based idempotency returns existing job"""
+        import hashlib
         db = TestingSessionLocal()
         
         user_id = "test_user"
-        idempotency_key = "unique_key_123"
         payload = "test_payload"
+        idem_key = hashlib.md5(payload.encode()).hexdigest()
         
-        # Create first job
-        job1 = create_new_job(db, user_id, payload, idempotency_key)
+        job1 = create_new_job(db, user_id, payload, idem_key)
         job1_id = job1.id
         
-        # Check idempotency - should return same job
-        job2 = check_idempotency(db, user_id, idempotency_key)
+        job2 = check_idempotency(db, payload)
         
         assert job2 is not None
         assert job2.id == job1_id
-        assert job2.idempotency_key == idempotency_key
         
         db.close()
     
-    def test_different_users_different_jobs(self):
-        """Test that same idempotency key for different users creates different jobs"""
+    def test_same_payload_returns_same_job(self):
+        """Test that same payload always returns same job regardless of user"""
+        import hashlib
         db = TestingSessionLocal()
         
-        idempotency_key = "same_key"
-        payload = "test_payload"
+        payload = "shared_payload"
+        idem_key = hashlib.md5(payload.encode()).hexdigest()
         
-        # Create job for user 1
-        job1 = create_new_job(db, "user_1", payload, idempotency_key)
+        job1 = create_new_job(db, "user_1", payload, idem_key)
         
-        # Create job for user 2 with same idempotency key
-        job2 = create_new_job(db, "user_2", payload, idempotency_key)
+        job2 = check_idempotency(db, payload)
+        
+        assert job1.id == job2.id
+        
+        db.close()
+    
+    def test_different_payloads_different_jobs(self):
+        """Test that different payloads create different jobs"""
+        import hashlib
+        db = TestingSessionLocal()
+        
+        payload1 = "payload_A"
+        payload2 = "payload_B"
+        idem_key1 = hashlib.md5(payload1.encode()).hexdigest()
+        idem_key2 = hashlib.md5(payload2.encode()).hexdigest()
+        
+        job1 = create_new_job(db, "user_1", payload1, idem_key1)
+        job2 = create_new_job(db, "user_1", payload2, idem_key2)
         
         assert job1.id != job2.id
-        assert job1.user_id != job2.user_id
-        
-        db.close()
-    
-    def test_empty_idempotency_key(self):
-        """Test that empty idempotency key returns None"""
-        db = TestingSessionLocal()
-        
-        result = check_idempotency(db, "user_1", "")
-        assert result is None
         
         db.close()
 
