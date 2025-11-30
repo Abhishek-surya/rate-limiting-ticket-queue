@@ -12,6 +12,8 @@ class JobStatusResponse(BaseModel):
     state: str
     result: str | None = None
     error_message: str | None = None
+    idempotency_key: str | None = None
+    is_duplicate: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

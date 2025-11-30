@@ -22,7 +22,9 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
             job_id=existing_job.id,
             state=existing_job.state,
             result=existing_job.result,
-            error_message=existing_job.error_message
+            error_message=existing_job.error_message,
+            idempotency_key=existing_job.idempotency_key,
+            is_duplicate=True
         )
     
     rate_limit_error = None
@@ -46,14 +48,18 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
             job_id=job.id,
             state="failed",
             result=None,
-            error_message=rate_limit_error
+            error_message=rate_limit_error,
+            idempotency_key=idem_key,
+            is_duplicate=False
         )
     
     return JobStatusResponse(
         job_id=job.id,
         state=job.state,
         result=job.result,
-        error_message=job.error_message
+        error_message=job.error_message,
+        idempotency_key=idem_key,
+        is_duplicate=False
     )
 
 

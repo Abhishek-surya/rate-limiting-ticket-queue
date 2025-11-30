@@ -414,8 +414,8 @@
                     <input type="text" id="payload" placeholder="Enter payload" required>
                 </div>
                 <div class="form-group">
-                    <label for="idempotencyKey">Idempotency Key:</label>
-                    <input type="text" id="idempotencyKey" placeholder="Enter unique key" required>
+                    <label for="generatedKey">Generated Key (Read-Only):</label>
+                    <input type="text" id="generatedKey" readonly style="background-color: #f0f0f0; cursor: not-allowed;">
                 </div>
                 <button type="submit" style="width: 100%; margin-top: 20px;">Submit</button>
             </form>
@@ -432,6 +432,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboard();
             setInterval(loadDashboard, 5000);
+
+            const payloadInput = document.getElementById('payload');
+            if (payloadInput) {
+                payloadInput.addEventListener('input', () => {
+                    const payload = payloadInput.value;
+                    if (payload) {
+                        const hash = generateMD5(payload);
+                        document.getElementById('generatedKey').value = hash;
+                    } else {
+                        document.getElementById('generatedKey').value = '';
+                    }
+                });
+            }
         });
 
         async function loadDashboard() {
@@ -610,6 +623,9 @@
 
         function openSubmitModal() {
             document.getElementById('submitModal').style.display = 'block';
+            document.getElementById('userId').value = '';
+            document.getElementById('payload').value = '';
+            document.getElementById('generatedKey').value = '';
         }
 
         function closeSubmitModal() {
@@ -618,12 +634,23 @@
             document.getElementById('submitAlert').className = 'alert';
         }
 
+        // Simple MD5 hash function
+        function generateMD5(str) {
+            let hash = 0;
+            if (str.length === 0) return '';
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return 'key_' + Math.abs(hash).toString(16);
+        }
+
         async function submitJob(event) {
             event.preventDefault();
             
             const userId = document.getElementById('userId').value;
             const payload = document.getElementById('payload').value;
-            const idempotencyKey = document.getElementById('idempotencyKey').value;
 
             try {
                 const response = await fetch(`${API_BASE}/jobs/submit_job`, {
@@ -633,8 +660,7 @@
                     },
                     body: JSON.stringify({
                         user_id: userId,
-                        payload: payload,
-                        idempotency_key: idempotencyKey
+                        payload: payload
                     })
                 });
 
@@ -644,9 +670,16 @@
                     throw new Error(data.detail || 'Failed to submit job');
                 }
 
-                showSuccess(`Job submitted successfully! Job ID: ${data.job_id}`);
+                // Check if it's a duplicate submission
+                if (data.is_duplicate) {
+                    showSuccess(`⚠️ Job already submitted! This payload was previously sent. Returned Job ID: ${data.job_id}`);
+                } else {
+                    showSuccess(`✓ Job submitted successfully! Job ID: ${data.job_id}`);
+                }
+                
                 document.getElementById('submitModal').style.display = 'none';
                 document.querySelector('form').reset();
+                document.getElementById('generatedKey').value = '';
                 
                 setTimeout(loadDashboard, 500);
             } catch (error) {
