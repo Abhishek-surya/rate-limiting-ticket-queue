@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from core.database import get_db
-from models.job_model import Job
-from schemas.job_schema import SubmitJobRequest, JobStatusResponse, DashboardResponse, DashboardStats, JobDetailResponse
-from services.rate_limiter import check_rate_limit
-from services.idempotency import check_idempotency
-from services.job_service import create_new_job, get_job_by_id, mark_job_failed
-from services.dashboard_service import get_running_jobs, get_dashboard_stats, get_recent_jobs, get_failed_jobs
+from app.core.database import get_db
+from app.models.job_model import Job
+from app.schemas.job_schema import SubmitJobRequest, JobStatusResponse, DashboardResponse, DashboardStats, JobDetailResponse
+from app.services.rate_limiter import check_rate_limit
+from app.services.idempotency import check_idempotency
+from app.services.job_service import create_new_job, get_job_by_id, mark_job_failed
+from app.services.dashboard_service import get_running_jobs, get_dashboard_stats, get_recent_jobs, get_failed_jobs
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
 

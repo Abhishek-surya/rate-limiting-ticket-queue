@@ -30,12 +30,12 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from main import app
-from core.database import Base, get_db
-from models.job_model import Job
-from services.rate_limiter import FixedWindowRateLimiter
-from services.idempotency import check_idempotency
-from services.job_service import (
+from app.main import app
+from app.core.database import Base, get_db
+from app.models.job_model import Job
+from app.services.rate_limiter import FixedWindowRateLimiter
+from app.services.idempotency import check_idempotency
+from app.services.job_service import (
     create_new_job,
     get_job_by_id,
     pick_next_job_for_worker,
@@ -44,7 +44,7 @@ from services.job_service import (
     mark_job_failed,
     reset_running_jobs_on_restart
 )
-from core.config import GLOBAL_RATE_LIMIT, PER_USER_RATE_LIMIT, WINDOW_SECONDS
+from app.core.config import GLOBAL_RATE_LIMIT, PER_USER_RATE_LIMIT, WINDOW_SECONDS
 
 
 # ============================================================================

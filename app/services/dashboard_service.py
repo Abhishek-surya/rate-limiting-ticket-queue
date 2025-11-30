@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from models.job_model import Job
+from app.models.job_model import Job
 from datetime import datetime
 
 
