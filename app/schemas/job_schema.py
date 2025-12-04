@@ -39,7 +39,6 @@ class DashboardStats(BaseModel):
     running_count: int
     done_count: int
     failed_count: int
-    avg_processing_time: float | None = None
 
 
 class DashboardResponse(BaseModel):

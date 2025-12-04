@@ -27,26 +27,12 @@ def get_dashboard_stats(db: Session):
     done = db.query(func.count(Job.id)).filter(Job.state == "done").scalar()
     failed = db.query(func.count(Job.id)).filter(Job.state == "failed").scalar()
     
-    avg_time = None
-    completed_jobs = db.query(Job).filter(Job.state.in_(["done", "failed"])).all()
-    if completed_jobs:
-        total_time = 0
-        count = 0
-        for job in completed_jobs:
-            if job.last_served and job.created_at:
-                delta = (job.last_served - job.created_at).total_seconds()
-                total_time += delta
-                count += 1
-        if count > 0:
-            avg_time = total_time / count
-    
     return {
         "total_jobs": total or 0,
         "queued_count": queued or 0,
         "running_count": running or 0,
         "done_count": done or 0,
         "failed_count": failed or 0,
-        "avg_processing_time": avg_time
     }
 
 

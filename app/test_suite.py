@@ -47,9 +47,7 @@ from app.services.job_service import (
 from app.core.config import GLOBAL_RATE_LIMIT, PER_USER_RATE_LIMIT, WINDOW_SECONDS
 
 
-# ============================================================================
 # TEST DATABASE SETUP
-# ============================================================================
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
@@ -87,9 +85,7 @@ def cleanup_db():
     Base.metadata.create_all(bind=engine)
 
 
-# ============================================================================
 # UNIT TESTS: Rate Limiter
-# ============================================================================
 
 class TestRateLimiter:
     """Test fixed window rate limit logic"""
@@ -167,9 +163,7 @@ class TestRateLimiter:
         limiter.check("user_2")
 
 
-# ============================================================================
 # UNIT TESTS: Idempotency
-# ============================================================================
 
 class TestIdempotency:
     """Test idempotency correctness"""
@@ -227,9 +221,7 @@ class TestIdempotency:
         db.close()
 
 
-# ============================================================================
 # UNIT TESTS: Job State Transitions
-# ============================================================================
 
 class TestJobStateTransitions:
     """Test job state transitions"""
@@ -274,9 +266,7 @@ class TestJobStateTransitions:
         db.close()
 
 
-# ============================================================================
 # UNIT TESTS: Fair Scheduling
-# ============================================================================
 
 class TestFairScheduling:
     """Test fair scheduling using last_served method"""
@@ -320,9 +310,7 @@ class TestFairScheduling:
         db.close()
 
 
-# ============================================================================
 # INTEGRATION TESTS: Concurrent Submissions
-# ============================================================================
 
 class TestConcurrentSubmissions:
     """Test concurrent job submissions"""
@@ -391,9 +379,7 @@ class TestConcurrentSubmissions:
             pytest.skip("submit_job or job_status endpoints not available")
 
 
-# ============================================================================
 # INTEGRATION TESTS: Fair Ordering Verification
-# ============================================================================
 
 class TestFairOrderingVerification:
     """Test fair ordering of job processing"""
@@ -421,9 +407,7 @@ class TestFairOrderingVerification:
         db.close()
 
 
-# ============================================================================
 # INTEGRATION TESTS: Restart Recovery
-# ============================================================================
 
 class TestRestartRecovery:
     """Test system recovery on restart"""
@@ -459,9 +443,7 @@ class TestRestartRecovery:
         db.close()
 
 
-# ============================================================================
 # INTEGRATION TESTS: Dashboard Data
-# ============================================================================
 
 class TestDashboardData:
     """Test dashboard data aggregation"""
@@ -486,9 +468,7 @@ class TestDashboardData:
         assert response.status_code in [200, 404]  # 404 if endpoint not implemented
 
 
-# ============================================================================
 # LOAD TESTING: 100-200 Concurrent Requests
-# ============================================================================
 
 class TestLoadTesting:
     """Load testing with concurrent requests"""
@@ -589,9 +569,7 @@ class TestLoadTesting:
         assert len(results) == num_operations
 
 
-# ============================================================================
 # PERFORMANCE METRICS
-# ============================================================================
 
 def test_performance_metrics():
     """Test performance metrics and response times"""
