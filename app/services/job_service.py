@@ -19,10 +19,6 @@ def get_job_by_id(db: Session, job_id: int):
     return db.query(Job).filter(Job.id == job_id).first()
 
 
-def pick_next_job_for_worker(db: Session):
-    return db.query(Job).filter(Job.state == "queued").order_by(Job.id).first()
-
-
 def mark_job_running(db: Session, job: Job):
     job.state = "running"
     db.commit()

@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import hashlib
 
 from app.core.database import get_db
-from app.models.job_model import Job
 from app.schemas.job_schema import SubmitJobRequest, JobStatusResponse, DashboardResponse, DashboardStats, JobDetailResponse
 from app.services.rate_limiter import check_rate_limit
 from app.services.idempotency import check_idempotency

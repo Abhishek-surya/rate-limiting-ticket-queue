@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.job_model import Job
-from datetime import datetime
 
 
 def get_all_jobs(db: Session):

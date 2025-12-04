@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import Base, engine, SessionLocal
-from sqlalchemy import inspect, text
-from app.models.job_model import Job
 from app.controllers.job_controller import router as job_router
+from app.services.job_service import reset_running_jobs_on_restart
 import threading
 from app.worker.worker import run_worker
 
@@ -31,7 +30,14 @@ def start_worker_thread():
 def startup_event():
     Base.metadata.create_all(bind=engine)
     print("[Startup] Database tables created/verified")
-    
+
+    db = SessionLocal()
+    try:
+        reset_running_jobs_on_restart(db)
+        print("[Startup] Reset any running jobs back to queued state")
+    finally:
+        db.close()
+
     start_worker_thread()
 
 app.include_router(job_router)

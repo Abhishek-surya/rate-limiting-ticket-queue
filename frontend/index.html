@@ -356,6 +356,7 @@
             <div class="controls">
                 <button onclick="loadDashboard()">🔄 Refresh</button>
                 <button class="submit-btn" onclick="openSubmitModal()">➕ Submit Job</button>
+                <button onclick="openSearchModal()">🔍 Search Job</button>
                 <span class="refresh-indicator">Auto-refresh every 5 seconds</span>
             </div>
         </header>
@@ -413,12 +414,24 @@
                     <label for="payload">Payload:</label>
                     <input type="text" id="payload" placeholder="Enter payload" required>
                 </div>
-                <div class="form-group">
-                    <label for="generatedKey">Generated Key (Read-Only):</label>
-                    <input type="text" id="generatedKey" readonly style="background-color: #f0f0f0; cursor: not-allowed;">
-                </div>
                 <button type="submit" style="width: 100%; margin-top: 20px;">Submit</button>
             </form>
+        </div>
+    </div>
+
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSearchModal()">&times;</span>
+            <h2>Search Job by ID</h2>
+            <div class="alert" id="searchAlert"></div>
+            <form onsubmit="searchJob(event)">
+                <div class="form-group">
+                    <label for="searchJobId">Job ID:</label>
+                    <input type="number" id="searchJobId" placeholder="Enter job ID" required>
+                </div>
+                <button type="submit" style="width: 100%; margin-top: 20px;">Search</button>
+            </form>
+            <div id="searchResult" style="margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -432,19 +445,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboard();
             setInterval(loadDashboard, 5000);
-
-            const payloadInput = document.getElementById('payload');
-            if (payloadInput) {
-                payloadInput.addEventListener('input', () => {
-                    const payload = payloadInput.value;
-                    if (payload) {
-                        const hash = generateMD5(payload);
-                        document.getElementById('generatedKey').value = hash;
-                    } else {
-                        document.getElementById('generatedKey').value = '';
-                    }
-                });
-            }
         });
 
         async function loadDashboard() {
@@ -625,7 +625,6 @@
             document.getElementById('submitModal').style.display = 'block';
             document.getElementById('userId').value = '';
             document.getElementById('payload').value = '';
-            document.getElementById('generatedKey').value = '';
             document.getElementById('submitAlert').innerHTML = '';
             document.getElementById('submitAlert').className = 'alert';
         }
@@ -634,18 +633,6 @@
             document.getElementById('submitModal').style.display = 'none';
             document.getElementById('submitAlert').innerHTML = '';
             document.getElementById('submitAlert').className = 'alert';
-        }
-
-        // Simple MD5 hash function
-        function generateMD5(str) {
-            let hash = 0;
-            if (str.length === 0) return '';
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            return 'key_' + Math.abs(hash).toString(16);
         }
 
         async function submitJob(event) {
@@ -677,7 +664,6 @@
                 } else {
                     document.getElementById('submitModal').style.display = 'none';
                     document.querySelector('form').reset();
-                    document.getElementById('generatedKey').value = '';
                     document.getElementById('submitAlert').innerHTML = '';
                     document.getElementById('submitAlert').className = 'alert';
                 }
@@ -715,10 +701,61 @@
             console.error(message);
         }
 
+        function openSearchModal() {
+            document.getElementById('searchModal').style.display = 'block';
+            document.getElementById('searchJobId').value = '';
+            document.getElementById('searchAlert').innerHTML = '';
+            document.getElementById('searchAlert').className = 'alert';
+            document.getElementById('searchResult').innerHTML = '';
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').style.display = 'none';
+        }
+
+        async function searchJob(event) {
+            event.preventDefault();
+            const jobId = document.getElementById('searchJobId').value;
+            const resultDiv = document.getElementById('searchResult');
+            const alert = document.getElementById('searchAlert');
+
+            try {
+                const response = await fetch(`${API_BASE}/jobs/job_status/${jobId}`);
+                const data = await response.json();
+
+                if (data.state === 'not_found') {
+                    alert.className = 'alert error';
+                    alert.innerHTML = `Job ID ${jobId} not found`;
+                    resultDiv.innerHTML = '';
+                    return;
+                }
+
+                alert.className = 'alert';
+                alert.innerHTML = '';
+                
+                resultDiv.innerHTML = `
+                    <table style="margin-top: 0;">
+                        <tr><td><strong>Job ID</strong></td><td>#${data.job_id}</td></tr>
+                        <tr><td><strong>Status</strong></td><td><span class="status-badge status-${data.state}">${getStatusIcon(data.state)} ${capitalize(data.state)}</span></td></tr>
+                        <tr><td><strong>Result</strong></td><td>${data.result || '—'}</td></tr>
+                        <tr><td><strong>Error</strong></td><td style="color: #c53030;">${data.error_message || '—'}</td></tr>
+                    </table>
+                `;
+            } catch (error) {
+                alert.className = 'alert error';
+                alert.innerHTML = 'Failed to search job';
+                resultDiv.innerHTML = '';
+            }
+        }
+
         window.onclick = function(event) {
-            const modal = document.getElementById('submitModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
+            const submitModal = document.getElementById('submitModal');
+            const searchModal = document.getElementById('searchModal');
+            if (event.target === submitModal) {
+                submitModal.style.display = 'none';
+            }
+            if (event.target === searchModal) {
+                searchModal.style.display = 'none';
             }
         }
     </script>
