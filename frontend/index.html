@@ -3,435 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rate-Limiting Ticket Queue Dashboard</title>
+    <title>Queue Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-
-        header p {
-            color: #666;
-            font-size: 1.1em;
-        }
-
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #764ba2;
-        }
-
-        button.submit-btn {
-            background: #48bb78;
-        }
-
-        button.submit-btn:hover {
-            background: #38a169;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .stat-card h3 {
-            color: #666;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .stat-card .number {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-card.total .number {
-            color: #667eea;
-        }
-
-        .stat-card.queued .number {
-            color: #f6ad55;
-        }
-
-        .stat-card.running .number {
-            color: #4299e1;
-        }
-
-        .stat-card.done .number {
-            color: #48bb78;
-        }
-
-        .stat-card.failed .number {
-            color: #f56565;
-        }
-
-
-        .stat-card .unit {
-            color: #999;
-            font-size: 0.9em;
-        }
-
-        .section {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-
-        .section h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        table th {
-            background: #f7fafc;
-            color: #333;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        table td {
-            padding: 12px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        table tr:hover {
-            background: #f7fafc;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-
-        .status-queued {
-            background: #fed7d7;
-            color: #c53030;
-        }
-
-        .status-running {
-            background: #bee3f8;
-            color: #2c5aa0;
-        }
-
-        .status-done {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        .status-failed {
-            background: #fed7d7;
-            color: #742a2a;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .alert {
-            padding: 12px 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            display: none;
-        }
-
-        .alert.success {
-            background: #c6f6d5;
-            color: #22543d;
-            display: block;
-            border-left: 4px solid #48bb78;
-        }
-
-        .alert.error {
-            background: #fed7d7;
-            color: #742a2a;
-            display: block;
-            border-left: 4px solid #f56565;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        .empty-state svg {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-
-        .refresh-indicator {
-            color: #999;
-            font-size: 0.9em;
-            margin-top: 10px;
-        }
-
-        .job-details {
-            background: #f7fafc;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            color: #666;
-            max-width: 300px;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
-
-            table {
-                font-size: 0.9em;
-            }
-
-            table th, table td {
-                padding: 8px;
-            }
-
-            header h1 {
-                font-size: 1.8em;
-            }
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 5px; }
+        h1 { color: #333; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 3px; }
+        button:hover { background: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; font-weight: bold; }
+        .stats { display: flex; gap: 20px; margin: 20px 0; }
+        .stat { padding: 15px; background: #e9ecef; border-radius: 5px; flex: 1; text-align: center; }
+        .stat h3 { margin: 0; font-size: 14px; color: #666; }
+        .stat p { margin: 5px 0 0 0; font-size: 24px; font-weight: bold; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 100px auto; padding: 20px; width: 400px; border-radius: 5px; }
+        input { width: 100%; padding: 8px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 3px; }
+        .status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
+        .status-queued { background: #fff3cd; color: #856404; }
+        .status-running { background: #cce5ff; color: #004085; }
+        .status-done { background: #d4edda; color: #155724; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        .alert { padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .alert-error { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>📊 Queue Dashboard</h1>
-            <p>Real-time job queue monitoring and management</p>
-            <div class="controls">
-                <button onclick="loadDashboard()">🔄 Refresh</button>
-                <button class="submit-btn" onclick="openSubmitModal()">➕ Submit Job</button>
-                <button onclick="openSearchModal()">🔍 Search Job</button>
-                <span class="refresh-indicator">Auto-refresh every 5 seconds</span>
-            </div>
-        </header>
-
-        <!-- Statistics -->
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card loading">
-                <div class="spinner"></div>
-                <p>Loading statistics...</p>
-            </div>
+        <h1>Queue Dashboard</h1>
+        <div>
+            <button onclick="openSubmitModal()">Submit Job</button>
+            <button onclick="openSearchModal()">Search Job</button>
         </div>
 
-        <div class="section">
-            <h2>⚙️ Currently Running Jobs</h2>
-            <div id="runningJobsContainer">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading...</p>
-                </div>
-            </div>
-        </div>
+        <div class="stats" id="stats"></div>
 
-        <div class="section">
-            <h2>❌ Failed Jobs (Rate Limited & Errors)</h2>
-            <div id="failedJobsContainer">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading...</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>📋 Recent Jobs</h2>
-            <div id="recentJobsContainer">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading...</p>
-                </div>
-            </div>
-        </div>
+        <h2>Recent Jobs</h2>
+        <table id="jobsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Status</th>
+                    <th>Result</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody id="jobsBody"></tbody>
+        </table>
     </div>
 
     <div id="submitModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeSubmitModal()">&times;</span>
-            <h2>Submit New Job</h2>
-            <div class="alert" id="submitAlert"></div>
+            <h2>Submit Job</h2>
+            <div id="submitAlert"></div>
             <form onsubmit="submitJob(event)">
-                <div class="form-group">
-                    <label for="userId">User ID:</label>
-                    <input type="text" id="userId" placeholder="Enter user ID" required>
-                </div>
-                <div class="form-group">
-                    <label for="payload">Payload:</label>
-                    <input type="text" id="payload" placeholder="Enter payload" required>
-                </div>
-                <button type="submit" style="width: 100%; margin-top: 20px;">Submit</button>
+                <label>User ID:</label>
+                <input type="text" id="userId" required>
+                <label>Payload:</label>
+                <input type="text" id="payload" required>
+                <button type="submit">Submit</button>
+                <button type="button" onclick="closeModal('submitModal')">Cancel</button>
             </form>
         </div>
     </div>
 
     <div id="searchModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeSearchModal()">&times;</span>
-            <h2>Search Job by ID</h2>
-            <div class="alert" id="searchAlert"></div>
+            <h2>Search Job</h2>
+            <div id="searchAlert"></div>
             <form onsubmit="searchJob(event)">
-                <div class="form-group">
-                    <label for="searchJobId">Job ID:</label>
-                    <input type="number" id="searchJobId" placeholder="Enter job ID" required>
-                </div>
-                <button type="submit" style="width: 100%; margin-top: 20px;">Search</button>
+                <label>Job ID:</label>
+                <input type="number" id="searchJobId" required>
+                <button type="submit">Search</button>
+                <button type="button" onclick="closeModal('searchModal')">Cancel</button>
             </form>
-            <div id="searchResult" style="margin-top: 20px;"></div>
+            <div id="searchResult"></div>
         </div>
     </div>
 
@@ -440,8 +88,6 @@
             ? 'http://localhost:8000'
             : 'https://rate-limiting-ticket-queue-production.up.railway.app';
 
-        console.log('Using API Base:', API_BASE);
-
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboard();
             setInterval(loadDashboard, 5000);
@@ -449,313 +95,99 @@
 
         async function loadDashboard() {
             try {
-                const response = await fetch(`${API_BASE}/jobs/dashboard`);
-                if (!response.ok) throw new Error('Failed to load dashboard');
+                const res = await fetch(`${API_BASE}/jobs/dashboard`);
+                const data = await res.json();
                 
-                const data = await response.json();
-                updateStats(data.stats);
-                updateRunningJobs(data.running_jobs);
-                updateFailedJobs(data.failed_jobs);
-                updateRecentJobs(data.recent_jobs);
+                document.getElementById('stats').innerHTML = `
+                    <div class="stat"><h3>Total</h3><p>${data.stats.total_jobs}</p></div>
+                    <div class="stat"><h3>Queued</h3><p>${data.stats.queued_count}</p></div>
+                    <div class="stat"><h3>Running</h3><p>${data.stats.running_count}</p></div>
+                    <div class="stat"><h3>Done</h3><p>${data.stats.done_count}</p></div>
+                    <div class="stat"><h3>Failed</h3><p>${data.stats.failed_count}</p></div>
+                `;
+
+                const tbody = document.getElementById('jobsBody');
+                tbody.innerHTML = data.recent_jobs.map(job => `
+                    <tr>
+                        <td>#${job.id}</td>
+                        <td>${job.user_id}</td>
+                        <td><span class="status status-${job.state}">${job.state}</span></td>
+                        <td>${job.result || job.error_message || '—'}</td>
+                        <td>${new Date(job.created_at).toLocaleString()}</td>
+                    </tr>
+                `).join('');
             } catch (error) {
-                console.error('Error loading dashboard:', error);
-                showError('Failed to load dashboard data');
+                console.error('Error:', error);
             }
-        }
-
-        function updateStats(stats) {
-            const statsGrid = document.getElementById('statsGrid');
-            statsGrid.innerHTML = `
-                <div class="stat-card total">
-                    <h3>Total Jobs</h3>
-                    <div class="number">${stats.total_jobs}</div>
-                </div>
-                <div class="stat-card queued">
-                    <h3>Queued</h3>
-                    <div class="number">${stats.queued_count}</div>
-                </div>
-                <div class="stat-card running">
-                    <h3>Running</h3>
-                    <div class="number">${stats.running_count}</div>
-                </div>
-                <div class="stat-card done">
-                    <h3>Completed</h3>
-                    <div class="number">${stats.done_count}</div>
-                </div>
-                <div class="stat-card failed">
-                    <h3>Failed</h3>
-                    <div class="number">${stats.failed_count}</div>
-                </div>
-            `;
-        }
-
-        function updateRunningJobs(runningJobs) {
-            const container = document.getElementById('runningJobsContainer');
-            
-            if (!runningJobs || runningJobs.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>✨ No jobs currently running</p></div>';
-                return;
-            }
-
-            const tableHTML = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Job ID</th>
-                            <th>User ID</th>
-                            <th>Payload</th>
-                            <th>Status</th>
-                            <th>Started At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${runningJobs.map(job => `
-                            <tr>
-                                <td><strong>#${job.id}</strong></td>
-                                <td>${job.user_id}</td>
-                                <td><div class="job-details">${job.payload}</div></td>
-                                <td><span class="status-badge status-running">🔄 Running</span></td>
-                                <td>${formatDate(job.created_at)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            container.innerHTML = tableHTML;
-        }
-
-        function updateFailedJobs(failedJobs) {
-            const container = document.getElementById('failedJobsContainer');
-            
-            if (!failedJobs || failedJobs.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>✨ No failed jobs</p></div>';
-                return;
-            }
-
-            const tableHTML = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Job ID</th>
-                            <th>User ID</th>
-                            <th>Payload</th>
-                            <th>Error Message</th>
-                            <th>Failed At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${failedJobs.map(job => `
-                            <tr>
-                                <td><strong>#${job.id}</strong></td>
-                                <td>${job.user_id}</td>
-                                <td><div class="job-details">${job.payload}</div></td>
-                                <td><div class="job-details" style="color: #c53030;">${job.error_message || 'Unknown error'}</div></td>
-                                <td>${formatDate(job.updated_at)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            container.innerHTML = tableHTML;
-        }
-
-        function updateRecentJobs(recentJobs) {
-            const container = document.getElementById('recentJobsContainer');
-            
-            if (!recentJobs || recentJobs.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>📭 No jobs yet</p></div>';
-                return;
-            }
-
-            const tableHTML = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Job ID</th>
-                            <th>User ID</th>
-                            <th>Status</th>
-                            <th>Result</th>
-                            <th>Created</th>
-                            <th>Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${recentJobs.map(job => `
-                            <tr>
-                                <td><strong>#${job.id}</strong></td>
-                                <td>${job.user_id}</td>
-                                <td><span class="status-badge status-${job.state}">${getStatusIcon(job.state)} ${capitalize(job.state)}</span></td>
-                                <td>${job.result || '—'}</td>
-                                <td>${formatDate(job.created_at)}</td>
-                                <td>${formatDate(job.updated_at)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            container.innerHTML = tableHTML;
-        }
-
-        function getStatusIcon(state) {
-            const icons = {
-                'queued': '⏳',
-                'running': '🔄',
-                'done': '✅',
-                'failed': '❌'
-            };
-            return icons[state] || '❓';
-        }
-
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
         }
 
         function openSubmitModal() {
             document.getElementById('submitModal').style.display = 'block';
-            document.getElementById('userId').value = '';
-            document.getElementById('payload').value = '';
             document.getElementById('submitAlert').innerHTML = '';
-            document.getElementById('submitAlert').className = 'alert';
-        }
-
-        function closeSubmitModal() {
-            document.getElementById('submitModal').style.display = 'none';
-            document.getElementById('submitAlert').innerHTML = '';
-            document.getElementById('submitAlert').className = 'alert';
-        }
-
-        async function submitJob(event) {
-            event.preventDefault();
-            
-            const userId = document.getElementById('userId').value;
-            const payload = document.getElementById('payload').value;
-
-            try {
-                const response = await fetch(`${API_BASE}/jobs/submit_job`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        payload: payload
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.detail || 'Failed to submit job');
-                }
-
-                if (data.is_duplicate) {
-                    showDuplicateMessage(data.job_id);
-                } else {
-                    document.getElementById('submitModal').style.display = 'none';
-                    document.querySelector('form').reset();
-                    document.getElementById('submitAlert').innerHTML = '';
-                    document.getElementById('submitAlert').className = 'alert';
-                }
-                
-                setTimeout(loadDashboard, 500);
-            } catch (error) {
-                console.error('Error submitting job:', error);
-                showSubmitError(error.message);
-            }
-        }
-
-        function showDuplicateMessage(jobId) {
-            const alert = document.getElementById('submitAlert');
-            alert.className = 'alert error';
-            alert.innerHTML = `This job has already been submitted with the same payload. The existing job ID is: <strong>${jobId}</strong>. Please use a different payload or check the status of the existing job.`;
-            alert.style.display = 'block';
-        }
-
-        function showSuccess(message) {
-            const alert = document.getElementById('submitAlert');
-            alert.className = 'alert success';
-            alert.textContent = '✓ ' + message;
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 3000);
-        }
-
-        function showSubmitError(message) {
-            const alert = document.getElementById('submitAlert');
-            alert.className = 'alert error';
-            alert.textContent = '✗ ' + message;
-        }
-
-        function showError(message) {
-            console.error(message);
         }
 
         function openSearchModal() {
             document.getElementById('searchModal').style.display = 'block';
-            document.getElementById('searchJobId').value = '';
             document.getElementById('searchAlert').innerHTML = '';
-            document.getElementById('searchAlert').className = 'alert';
             document.getElementById('searchResult').innerHTML = '';
         }
 
-        function closeSearchModal() {
-            document.getElementById('searchModal').style.display = 'none';
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
         }
 
-        async function searchJob(event) {
-            event.preventDefault();
-            const jobId = document.getElementById('searchJobId').value;
-            const resultDiv = document.getElementById('searchResult');
-            const alert = document.getElementById('searchAlert');
+        async function submitJob(e) {
+            e.preventDefault();
+            const userId = document.getElementById('userId').value;
+            const payload = document.getElementById('payload').value;
 
             try {
-                const response = await fetch(`${API_BASE}/jobs/job_status/${jobId}`);
-                const data = await response.json();
+                const res = await fetch(`${API_BASE}/jobs/submit_job`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, payload: payload })
+                });
+                const data = await res.json();
 
-                if (data.state === 'not_found') {
-                    alert.className = 'alert error';
-                    alert.innerHTML = `Job ID ${jobId} not found`;
-                    resultDiv.innerHTML = '';
-                    return;
+                if (data.is_duplicate) {
+                    document.getElementById('submitAlert').innerHTML = 
+                        `<div class="alert alert-error">Duplicate job! Existing Job ID: ${data.job_id}</div>`;
+                } else {
+                    closeModal('submitModal');
+                    loadDashboard();
                 }
-
-                alert.className = 'alert';
-                alert.innerHTML = '';
-                
-                resultDiv.innerHTML = `
-                    <table style="margin-top: 0;">
-                        <tr><td><strong>Job ID</strong></td><td>#${data.job_id}</td></tr>
-                        <tr><td><strong>Status</strong></td><td><span class="status-badge status-${data.state}">${getStatusIcon(data.state)} ${capitalize(data.state)}</span></td></tr>
-                        <tr><td><strong>Result</strong></td><td>${data.result || '—'}</td></tr>
-                        <tr><td><strong>Error</strong></td><td style="color: #c53030;">${data.error_message || '—'}</td></tr>
-                    </table>
-                `;
             } catch (error) {
-                alert.className = 'alert error';
-                alert.innerHTML = 'Failed to search job';
-                resultDiv.innerHTML = '';
+                document.getElementById('submitAlert').innerHTML = 
+                    `<div class="alert alert-error">Error: ${error.message}</div>`;
             }
         }
 
-        window.onclick = function(event) {
-            const submitModal = document.getElementById('submitModal');
-            const searchModal = document.getElementById('searchModal');
-            if (event.target === submitModal) {
-                submitModal.style.display = 'none';
-            }
-            if (event.target === searchModal) {
-                searchModal.style.display = 'none';
+        async function searchJob(e) {
+            e.preventDefault();
+            const jobId = document.getElementById('searchJobId').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/jobs/job_status/${jobId}`);
+                const data = await res.json();
+
+                if (data.state === 'not_found') {
+                    document.getElementById('searchAlert').innerHTML = 
+                        `<div class="alert alert-error">Job not found</div>`;
+                    document.getElementById('searchResult').innerHTML = '';
+                } else {
+                    document.getElementById('searchAlert').innerHTML = '';
+                    document.getElementById('searchResult').innerHTML = `
+                        <table style="margin-top: 15px;">
+                            <tr><td><strong>Job ID</strong></td><td>#${data.job_id}</td></tr>
+                            <tr><td><strong>Status</strong></td><td><span class="status status-${data.state}">${data.state}</span></td></tr>
+                            <tr><td><strong>Result</strong></td><td>${data.result || '—'}</td></tr>
+                            <tr><td><strong>Error</strong></td><td>${data.error_message || '—'}</td></tr>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('searchAlert').innerHTML = 
+                    `<div class="alert alert-error">Error: ${error.message}</div>`;
             }
         }
     </script>
