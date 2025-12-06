@@ -1,3 +1,2 @@
 [build]
   publish = "frontend"
-  image = "ubuntu-22.04"
