@@ -32,7 +32,7 @@ def run_worker():
                 print(f"[Worker] Job {job.id} completed.")
 
             else:
-                time.sleep(1)
+                time.sleep(1) # Polling interval when no job is found
 
         except Exception as e:
             print("[Worker Error]:", e)

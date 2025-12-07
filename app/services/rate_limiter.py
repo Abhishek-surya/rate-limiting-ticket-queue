@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 from fastapi import HTTPException, status
@@ -11,12 +11,12 @@ class FixedWindowRateLimiter:
         self.user_limit = user_limit
         self.window = timedelta(seconds=window_seconds)
         self.global_count: int = 0
-        self.global_window_start: datetime = datetime.utcnow()
+        self.global_window_start: datetime = datetime.now(timezone.utc)
         self.user_counters: Dict[str, int] = {}
         self.user_window_start: Dict[str, datetime] = {}
 
     def _reset_window_if_needed(self) -> None:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         if now - self.global_window_start >= self.window:
             self.global_window_start = now
             self.global_count = 0
@@ -27,7 +27,7 @@ class FixedWindowRateLimiter:
         current = self.user_counters.get(user_id, 0)
         self.user_counters[user_id] = current + 1
         if user_id not in self.user_window_start:
-            self.user_window_start[user_id] = datetime.utcnow()
+            self.user_window_start[user_id] = datetime.now(timezone.utc)
 
     def check(self, user_id: str) -> None:
         self._reset_window_if_needed()

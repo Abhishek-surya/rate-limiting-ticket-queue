@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from datetime import datetime
+from datetime import datetime, timezone
 from app.core.database import Base
 
 class Job(Base):
@@ -15,5 +15,5 @@ class Job(Base):
     error_message = Column(String(255), nullable=True)
 
     last_served = Column(DateTime, default=None, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc)) # lambda function called at insertion time to get current utc time
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)) # onupdate called at every update to set current utc time 

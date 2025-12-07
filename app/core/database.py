@@ -17,16 +17,16 @@ engine = create_engine(
 )
 
 SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
+    autocommit=False, 
+    autoflush=False, 
+    bind=engine, # bind the engine to the sessionmaker
 )
 
-Base = declarative_base()
+Base = declarative_base() # base class for all ORM models 
 
-def get_db():
-    db = SessionLocal()
+def get_db(): # Dependency to get DB session
+    db = SessionLocal() 
     try:
-        yield db
+        yield db 
     finally:
         db.close()

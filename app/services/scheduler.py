@@ -4,7 +4,7 @@ from sqlalchemy import asc
 
 def pick_next_job(db: Session):
     return (
-        db.query(Job)
+        db.query(Job) 
         .filter(Job.state == "queued")
         .order_by(
             asc(Job.last_served),

@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import List
 
-class SubmitJobRequest(BaseModel):
+class SubmitJobRequest(BaseModel): # Basemodel for data validation ,parsing and type checking using pydantic
     user_id: str
     payload: str
 
@@ -14,8 +14,8 @@ class JobStatusResponse(BaseModel):
     error_message: str | None = None
     idempotency_key: str | None = None
     is_duplicate: bool = False
-
-    model_config = ConfigDict(from_attributes=True)
+ 
+    model_config = ConfigDict(from_attributes=True)  # pydantic reads data from attributes directly from ORM objects
 
 
 class JobDetailResponse(BaseModel):
@@ -43,6 +43,6 @@ class DashboardStats(BaseModel):
 
 class DashboardResponse(BaseModel):
     stats: DashboardStats
-    running_jobs: List[JobDetailResponse]
+    running_jobs: List[JobDetailResponse] 
     failed_jobs: List[JobDetailResponse]
     recent_jobs: List[JobDetailResponse]

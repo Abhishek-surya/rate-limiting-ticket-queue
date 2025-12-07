@@ -9,16 +9,16 @@ from app.services.idempotency import check_idempotency
 from app.services.job_service import create_new_job, get_job_by_id, mark_job_failed
 from app.services.dashboard_service import get_running_jobs, get_dashboard_stats, get_recent_jobs, get_failed_jobs
 
-router = APIRouter(prefix="/jobs", tags=["Jobs"])
+router = APIRouter(prefix="/jobs", tags=["Jobs"]) # grouping endpoints in jobs section 
 
-@router.post("/submit_job", response_model=JobStatusResponse)
-def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
+@router.post("/submit_job", response_model=JobStatusResponse) # response_model defines the expected response schema
+def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)): # dependency injection for database session 
 
-    existing_job = check_idempotency(db, request.payload)
+    existing_job, idem_key = check_idempotency(db, request.payload) 
 
     if existing_job:
         return JobStatusResponse(
-            job_id=existing_job.id,
+            job_id=existing_job.id, # existing_job is instance of Job model 
             state=existing_job.state,
             result=existing_job.result,
             error_message=existing_job.error_message,
@@ -26,15 +26,14 @@ def submit_job(request: SubmitJobRequest, db: Session = Depends(get_db)):
             is_duplicate=True
         )
     
-    rate_limit_error = None
+    rate_limit_error = None 
     try:
         check_rate_limit(request.user_id)
     except HTTPException as e:
-        rate_limit_error = e.detail if isinstance(e.detail, str) else str(e.detail)
-    
-    idem_key = hashlib.md5(request.payload.encode()).hexdigest()
+        rate_limit_error = e.detail if isinstance(e.detail, str) else str(e.detail) # isinstance check to ensure detail is string
+
     job = create_new_job(
-        db=db,
+        db=db, 
         user_id=request.user_id,
         payload=request.payload,
         idempotency_key=idem_key
@@ -93,8 +92,8 @@ def dashboard(db: Session = Depends(get_db)):
     recent_jobs = get_recent_jobs(db, limit=20)
     
     return DashboardResponse(
-        stats=DashboardStats(**stats),
-        running_jobs=[JobDetailResponse.from_orm(job) for job in running_jobs],
-        failed_jobs=[JobDetailResponse.from_orm(job) for job in failed_jobs],
-        recent_jobs=[JobDetailResponse.from_orm(job) for job in recent_jobs]
+        stats=DashboardStats(**stats), # unpacking stats dictionary into DashboardStats model 
+        running_jobs=[JobDetailResponse.model_validate(job) for job in  running_jobs], # model_validate converts ORM objects to pydantic schema for json reponse and stores in list
+        failed_jobs=[JobDetailResponse.model_validate(job) for job in failed_jobs], 
+        recent_jobs=[JobDetailResponse.model_validate(job) for job in recent_jobs]
     )

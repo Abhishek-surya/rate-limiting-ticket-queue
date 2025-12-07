@@ -27,10 +27,10 @@ def mark_job_running(db: Session, job: Job):
 
 
 def mark_job_done(db: Session, job: Job, result: str):
-    from datetime import datetime
+    from datetime import datetime, timezone
     job.state = "done"
     job.result = result
-    job.last_served = datetime.utcnow()  
+    job.last_served = datetime.now(timezone.utc)
     db.commit()
     db.refresh(job)
     return job
